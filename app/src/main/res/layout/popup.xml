@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/outPopup"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#AA000000"
+    android:weightSum="100"
+    android:layout_centerHorizontal="false"
+    android:paddingTop="100dp">
+    <LinearLayout
+    android:layout_height="match_parent"
+    android:layout_width="0dp"
+    android:layout_weight="10"
+    >
+    </LinearLayout>
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_popup"
+        android:layout_weight="80"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp">
+        <TextView
+            android:id="@+id/popupText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:text="Add a new ingredient"
+            android:layout_alignParentTop="false" />
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/popupInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/popupText"
+            android:theme="@style/TextLabel">>
+            <EditText
+                android:id="@+id/inputIngredient"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="ingredient" />
+        </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/popupInput2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/popupInput"
+            android:theme="@style/TextLabel">>
+            <EditText
+                android:id="@+id/inputQuantity"
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="quantity" />
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/popupButton"
+            android:text="Confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_button"
+            android:layout_below="@id/popupInput2"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+</LinearLayout>
