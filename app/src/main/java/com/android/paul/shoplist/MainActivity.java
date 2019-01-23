@@ -8,6 +8,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.JsonReader;
+import android.util.JsonWriter;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -32,8 +34,21 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    List<ShopElement> shopList = new ArrayList<ShopElement>();
+    String fileName = "IngredientListee";
 
     TableLayout stk;
     EditText inputQuantity;
@@ -148,6 +163,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tbrow0.addView(tv2);
         stk.addView(tbrow0);
         stk.setBackgroundColor(Color.WHITE);
+
+        List<ShopElement> shopElements = null;
+        try{
+            shopElements = readJsonStream(new FileInputStream(getFilesDir() + fileName));
+        }
+        catch(IOException ex) {
+            System.out.println("problem reading");
+        }
+        if(shopElements != null)
+        {
+            for(ShopElement shopElement : shopElements)
+            {
+                addRow(shopElement.getQuantity().getNumber(), shopElement.getIngredient().getName());
+            }
+        }
     }
 
     public void onButtonShowPopupWindowClick(View view) {
@@ -237,6 +267,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         t2v.setGravity(Gravity.CENTER);
         tbrow.addView(t2v);
         stk.addView(tbrow);
+        try{
+            ShopElement newShopElement = new ShopElement(new Ingredient(ingredient), new Quantity(quantity, "g"));
+            shopList.add(newShopElement);
+            writeJsonStream(new FileOutputStream(getFilesDir() + fileName), shopList);
+        }
+        catch(IOException ex)
+        {
+            System.out.println("problem writing");
+        }
+
     }
 
     private void checkRequiredFields() {
@@ -247,4 +287,97 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+
+
+
+
+
+    public void writeJsonStream(OutputStream out, List<ShopElement> message) throws IOException {
+        JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
+        writer.setIndent("  ");
+        writeMessagesArray(writer, message);
+        writer.close();
+    }
+    public void writeMessagesArray(JsonWriter writer, List<ShopElement> messages) throws IOException {
+        writer.beginArray();
+        for (ShopElement message : messages) {
+            writeMessage(writer, message);
+        }
+        writer.endArray();
+    }
+    public void writeMessage(JsonWriter writer, ShopElement message) throws IOException {
+        writer.beginObject();
+        writer.name("ingredient").value(message.getIngredient().getName());
+        writer.name("quantity");
+        writeQuantity(writer, message.getQuantity());
+        writer.endObject();
+    }
+    public void writeQuantity(JsonWriter writer, Quantity quantity) throws IOException {
+        writer.beginObject();
+        writer.name("number").value(quantity.getNumber());
+        writer.name("unit").value(quantity.getUnit());
+        writer.endObject();
+    }
+
+
+
+
+
+    public List<ShopElement> readJsonStream(InputStream in) throws IOException {
+        JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+        try {
+            return readMessagesArray(reader);
+        } finally {
+            reader.close();
+        }
+    }
+
+    public List<ShopElement> readMessagesArray(JsonReader reader) throws IOException {
+        List<ShopElement> messages = new ArrayList<>();
+
+        reader.beginArray();
+        while (reader.hasNext()) {
+            messages.add(readMessage(reader));
+        }
+        reader.endArray();
+        return messages;
+    }
+
+    public ShopElement readMessage(JsonReader reader) throws IOException {
+        Quantity quantity = new Quantity("","");
+        Ingredient ingredient = new Ingredient("");
+
+        reader.beginObject();
+        while (reader.hasNext()) {
+            String name = reader.nextName();
+            if (name.equals("quantity")) {
+                quantity = readQuantity(reader);
+            } else if (name.equals("ingredient")) {
+                ingredient.setName(reader.nextString());
+            } else {
+                reader.skipValue();
+            }
+        }
+        reader.endObject();
+        return new ShopElement(ingredient, quantity);
+    }
+
+    public Quantity readQuantity(JsonReader reader) throws IOException {
+        String number = "";
+        String unit = "";
+
+        reader.beginObject();
+        while (reader.hasNext()) {
+            String name = reader.nextName();
+            if (name.equals("number")) {
+                number = reader.nextString();
+            } else if (name.equals("unit")) {
+                unit = reader.nextString();
+            } else {
+                reader.skipValue();
+            }
+        }
+        reader.endObject();
+        return new Quantity(number, unit);
+    }
 }
