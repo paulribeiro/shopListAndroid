@@ -6,6 +6,8 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.JsonReader;
@@ -22,20 +24,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.RadioButton;
-import android.widget.RelativeLayout;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
-
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,10 +40,15 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    List<ShopElement> shopList = new ArrayList<ShopElement>();
+    private RecyclerView recyclerView;
+    private RecyclerViewAdapter adapter;
+    private  RecyclerView.LayoutManager layoutManager;
+
+    private List<ShopElement> shopList = new ArrayList<ShopElement>();
+
     String fileName = "IngredientListee";
 
-    TableLayout stk;
+    //TableLayout stk;
     EditText inputQuantity;
     EditText inputIngredient;
     Button addButton;
@@ -60,9 +58,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
-        init();
+        initData();
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+        //recyclerView.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new RecyclerViewAdapter(shopList);
+        recyclerView.setAdapter(adapter);
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -143,7 +149,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-    public void init() {
+    public void initData() {
+        /*
         stk = (TableLayout) findViewById(R.id.table_main);
         TableRow tbrow0 = new TableRow(this);
         TextView tv0 = new TextView(this);
@@ -163,21 +170,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tbrow0.addView(tv2);
         stk.addView(tbrow0);
         stk.setBackgroundColor(Color.WHITE);
+        */
 
-        List<ShopElement> shopElements = null;
+        //List<ShopElement> shopElements = null;
         try{
-            shopElements = readJsonStream(new FileInputStream(getFilesDir() + fileName));
+            shopList = readJsonStream(new FileInputStream(getFilesDir() + fileName));
         }
         catch(IOException ex) {
             System.out.println("problem reading");
         }
-        if(shopElements != null)
+        /*
+        for(ShopElement shopElement : shopList)
         {
-            for(ShopElement shopElement : shopElements)
-            {
                 addRow(shopElement.getQuantity().getNumber(), shopElement.getIngredient().getName());
-            }
         }
+        */
     }
 
     public void onButtonShowPopupWindowClick(View view) {
@@ -252,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void addRow(String quantity, String ingredient) {
+        /*
         TableRow tbrow = new TableRow(this);
         CheckBox checkBox = new CheckBox(this);
         checkBox.setGravity(Gravity.CENTER);
@@ -267,10 +275,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         t2v.setGravity(Gravity.CENTER);
         tbrow.addView(t2v);
         stk.addView(tbrow);
+        */
         try{
             ShopElement newShopElement = new ShopElement(new Ingredient(ingredient), new Quantity(quantity, "g"));
             shopList.add(newShopElement);
             writeJsonStream(new FileOutputStream(getFilesDir() + fileName), shopList);
+            adapter.notifyDataSetChanged();
         }
         catch(IOException ex)
         {
