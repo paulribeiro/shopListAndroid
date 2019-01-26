@@ -1,17 +1,16 @@
 package com.android.paul.shoplist;
 
-import android.content.DialogInterface;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.JsonReader;
-import android.util.JsonWriter;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -28,27 +27,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import com.android.paul.shoplist.filecommunication.Reader;
+import com.android.paul.shoplist.filecommunication.Writer;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
 
     private RecyclerView recyclerView;
     private RecyclerViewAdapter adapter;
-    private  RecyclerView.LayoutManager layoutManager;
-
     private List<ShopElement> shopList = new ArrayList<ShopElement>();
+    private View mainView;
 
-    String fileName = "IngredientListee";
+    String fileName = "ShopListeeeee";
 
-    //TableLayout stk;
     EditText inputQuantity;
     EditText inputIngredient;
     Button addButton;
@@ -58,15 +53,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
-        initData();
+        mainView = findViewById(R.id.content_main);
 
+        initData();
 
         recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
         //recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         adapter = new RecyclerViewAdapter(shopList);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         recyclerView.setAdapter(adapter);
+
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -76,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 onButtonShowPopupWindowClick(findViewById(R.id.content_main));
-
             }
         });
 
@@ -141,50 +141,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_send) {
 
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
-
-
     public void initData() {
-        /*
-        stk = (TableLayout) findViewById(R.id.table_main);
-        TableRow tbrow0 = new TableRow(this);
-        TextView tv0 = new TextView(this);
-        tv0.setPadding(24,24,24,24);
-        tv0.setText("Need");
-        tv0.setTextColor(Color.BLACK);
-        tbrow0.addView(tv0);
-        TextView tv1 = new TextView(this);
-        tv1.setPadding(24,24,24,24);
-        tv1.setText("Quantity");
-        tv1.setTextColor(Color.BLACK);
-        tbrow0.addView(tv1);
-        TextView tv2 = new TextView(this);
-        tv2.setPadding(24,24,24,24);
-        tv2.setText("Product");
-        tv2.setTextColor(Color.BLACK);
-        tbrow0.addView(tv2);
-        stk.addView(tbrow0);
-        stk.setBackgroundColor(Color.WHITE);
-        */
-
-        //List<ShopElement> shopElements = null;
         try{
-            shopList = readJsonStream(new FileInputStream(getFilesDir() + fileName));
+            shopList = Reader.readJsonStream(new FileInputStream(getFilesDir() + fileName));
         }
         catch(IOException ex) {
             System.out.println("problem reading");
         }
-        /*
-        for(ShopElement shopElement : shopList)
-        {
-                addRow(shopElement.getQuantity().getNumber(), shopElement.getIngredient().getName());
-        }
-        */
     }
 
     public void onButtonShowPopupWindowClick(View view) {
@@ -219,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addRow(inputQuantity.getText().toString(), inputIngredient.getText().toString());
+                addRow(new ShopElement(new Ingredient(inputIngredient.getText().toString()), new Quantity(inputQuantity.getText().toString(), "g")));
                 popupWindow.dismiss();
             }
         });
@@ -240,7 +208,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             }
         });
-
         inputIngredient.addTextChangedListener (new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int i, int i1, int i2){
@@ -258,35 +225,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    public void addRow(String quantity, String ingredient) {
-        /*
-        TableRow tbrow = new TableRow(this);
-        CheckBox checkBox = new CheckBox(this);
-        checkBox.setGravity(Gravity.CENTER);
-        tbrow.addView(checkBox);
-        TextView t1v = new TextView(this);
-        t1v.setText(quantity);
-        t1v.setTextColor(Color.BLACK);
-        t1v.setGravity(Gravity.CENTER);
-        tbrow.addView(t1v);
-        TextView t2v = new TextView(this);
-        t2v.setText(ingredient);
-        t2v.setTextColor(Color.BLACK);
-        t2v.setGravity(Gravity.CENTER);
-        tbrow.addView(t2v);
-        stk.addView(tbrow);
-        */
+    public void addRow(ShopElement newShopElement) {
         try{
-            ShopElement newShopElement = new ShopElement(new Ingredient(ingredient), new Quantity(quantity, "g"));
             shopList.add(newShopElement);
-            writeJsonStream(new FileOutputStream(getFilesDir() + fileName), shopList);
+            Writer.writeJsonStream(new FileOutputStream(getFilesDir() + fileName), shopList);
             adapter.notifyDataSetChanged();
         }
         catch(IOException ex)
         {
             System.out.println("problem writing");
         }
-
     }
 
     private void checkRequiredFields() {
@@ -297,97 +245,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
 
+        if (viewHolder instanceof RecyclerViewHolder) {
+            // get the removed item name to display it in snack bar
+            String deletedName = shopList.get(viewHolder.getAdapterPosition()).getIngredient().getName();
 
+            // backup of removed item for undo purpose
+            final ShopElement deletedItem = shopList.get(viewHolder.getAdapterPosition());
+            final int deletedIndex = viewHolder.getAdapterPosition();
 
+            // remove the item from recycler view
+            adapter.removeItem(viewHolder.getAdapterPosition());
 
+            // showing snack bar with Undo option
+            Snackbar snackbar = Snackbar
+                    .make(mainView, deletedName + " removed from cart!", Snackbar.LENGTH_LONG);
+            snackbar.setAction("UNDO", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-    public void writeJsonStream(OutputStream out, List<ShopElement> message) throws IOException {
-        JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
-        writer.setIndent("  ");
-        writeMessagesArray(writer, message);
-        writer.close();
-    }
-    public void writeMessagesArray(JsonWriter writer, List<ShopElement> messages) throws IOException {
-        writer.beginArray();
-        for (ShopElement message : messages) {
-            writeMessage(writer, message);
+                    // undo is selected, restore the deleted item
+                    adapter.restoreItem(deletedItem, deletedIndex);
+                }
+            });
+            snackbar.setActionTextColor(Color.YELLOW);
+            snackbar.show();
         }
-        writer.endArray();
-    }
-    public void writeMessage(JsonWriter writer, ShopElement message) throws IOException {
-        writer.beginObject();
-        writer.name("ingredient").value(message.getIngredient().getName());
-        writer.name("quantity");
-        writeQuantity(writer, message.getQuantity());
-        writer.endObject();
-    }
-    public void writeQuantity(JsonWriter writer, Quantity quantity) throws IOException {
-        writer.beginObject();
-        writer.name("number").value(quantity.getNumber());
-        writer.name("unit").value(quantity.getUnit());
-        writer.endObject();
-    }
 
-
-
-
-
-    public List<ShopElement> readJsonStream(InputStream in) throws IOException {
-        JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
-        try {
-            return readMessagesArray(reader);
-        } finally {
-            reader.close();
-        }
-    }
-
-    public List<ShopElement> readMessagesArray(JsonReader reader) throws IOException {
-        List<ShopElement> messages = new ArrayList<>();
-
-        reader.beginArray();
-        while (reader.hasNext()) {
-            messages.add(readMessage(reader));
-        }
-        reader.endArray();
-        return messages;
-    }
-
-    public ShopElement readMessage(JsonReader reader) throws IOException {
-        Quantity quantity = new Quantity("","");
-        Ingredient ingredient = new Ingredient("");
-
-        reader.beginObject();
-        while (reader.hasNext()) {
-            String name = reader.nextName();
-            if (name.equals("quantity")) {
-                quantity = readQuantity(reader);
-            } else if (name.equals("ingredient")) {
-                ingredient.setName(reader.nextString());
-            } else {
-                reader.skipValue();
-            }
-        }
-        reader.endObject();
-        return new ShopElement(ingredient, quantity);
-    }
-
-    public Quantity readQuantity(JsonReader reader) throws IOException {
-        String number = "";
-        String unit = "";
-
-        reader.beginObject();
-        while (reader.hasNext()) {
-            String name = reader.nextName();
-            if (name.equals("number")) {
-                number = reader.nextString();
-            } else if (name.equals("unit")) {
-                unit = reader.nextString();
-            } else {
-                reader.skipValue();
-            }
-        }
-        reader.endObject();
-        return new Quantity(number, unit);
     }
 }
