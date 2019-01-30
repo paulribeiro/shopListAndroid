@@ -1,5 +1,6 @@
 package com.android.paul.shoplist;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -23,9 +24,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.PopupWindow;
 import com.android.paul.shoplist.filecommunication.Reader;
 import com.android.paul.shoplist.filecommunication.Writer;
@@ -42,11 +45,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private List<ShopElement> shopList = new ArrayList<ShopElement>();
     private View mainView;
 
-    String fileName = "ShopListeeeee";
+    String fileName = "ShopListeeeeeee";
 
     EditText inputQuantity;
     EditText inputIngredient;
     Button addButton;
+
+    String quantityNum = "";
+    String quantityUnit = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,8 +177,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // which view you pass in doesn't matter, it is only used for the window tolken
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
 
+        View outPopup = popupView.findViewById(R.id.outPopup);
         // dismiss the popup window when touched
-        popupView.setOnTouchListener(new View.OnTouchListener() {
+        outPopup.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 popupWindow.dismiss();
@@ -180,34 +187,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+        final View popupContent = popupView.findViewById(R.id.popupContent);
+        popupContent.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(popupContent.getWindowToken(), 0);
+
+                //Utils.hideSoftKeyboard();
+                return true;
+            }
+        });
+
         addButton = (Button) popupView.findViewById(R.id.popupButton);
         addButton.setEnabled(false);
         inputIngredient = (EditText) popupView.findViewById(R.id.inputIngredient);
-        inputQuantity = (EditText) popupView.findViewById(R.id.inputQuantity);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addRow(new ShopElement(new Ingredient(inputIngredient.getText().toString()), new Quantity(inputQuantity.getText().toString(), "g")));
+                addRow(new ShopElement(new Ingredient(inputIngredient.getText().toString()), new Quantity(quantityNum, quantityUnit)));
                 popupWindow.dismiss();
             }
         });
 
-        inputQuantity.addTextChangedListener (new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence s, int i, int i1, int i2){
-                checkRequiredFields();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-        });
         inputIngredient.addTextChangedListener (new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int i, int i1, int i2){
@@ -223,6 +225,60 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             }
         });
+
+
+        NumberPicker nbPicker = popupView.findViewById(R.id.nbPicker);
+        //Initializing a new string array with elements
+        final String[] values= {"---","1", "2", "3", "4", "5", "6", "7", "8", "9", "10","11", "12", "100", "250", "500"};
+        //Populate NumberPicker values from String array values
+        //Set the minimum value of NumberPicker
+        nbPicker.setMinValue(0); //from array first value
+        //Specify the maximum value/number of NumberPicker
+        nbPicker.setMaxValue(values.length-1); //to array last value
+        //Specify the NumberPicker data source as array elements
+        nbPicker.setDisplayedValues(values);
+        //Gets whether the selector wheel wraps when reaching the min/max value.
+        nbPicker.setWrapSelectorWheel(true);
+        //Set a value change listener for NumberPicker
+        nbPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal){
+                //Display the newly selected value from picker
+                if(!values[newVal].equals("---")){
+                    quantityNum = values[newVal];
+                }
+                else{
+                    quantityNum = "";
+                }
+            }
+        });
+
+        NumberPicker nbPicker2 = popupView.findViewById(R.id.nbPicker2);
+        //Initializing a new string array with elements
+        final String[] values2= {"---","g", "kg"};
+        //Populate NumberPicker values from String array values
+        //Set the minimum value of NumberPicker
+        nbPicker2.setMinValue(0); //from array first value
+        //Specify the maximum value/number of NumberPicker
+        nbPicker2.setMaxValue(values2.length-1); //to array last value
+        //Specify the NumberPicker data source as array elements
+        nbPicker2.setDisplayedValues(values2);
+        //Gets whether the selector wheel wraps when reaching the min/max value.
+        nbPicker2.setWrapSelectorWheel(true);
+        //Set a value change listener for NumberPicker
+        nbPicker2.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal){
+                //Display the newly selected value from picker
+                if(!values2[newVal].equals("---")){
+                    quantityUnit = values2[newVal];
+                }
+                else{
+                    quantityUnit = "";
+                }
+            }
+        });
+
     }
 
     public void addRow(ShopElement newShopElement) {
@@ -238,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void checkRequiredFields() {
-        if (!inputIngredient.getText().toString().isEmpty() && !inputQuantity.getText().toString().isEmpty()) {
+        if (!inputIngredient.getText().toString().isEmpty()) {
             addButton.setEnabled(true);
         } else {
             addButton.setEnabled(false);
