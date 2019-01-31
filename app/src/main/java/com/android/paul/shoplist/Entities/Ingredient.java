@@ -1,4 +1,4 @@
-package com.android.paul.shoplist;
+package com.android.paul.shoplist.Entities;
 
 public class Ingredient {
 

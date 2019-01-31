@@ -2,9 +2,9 @@ package com.android.paul.shoplist.filecommunication;
 
 import android.util.JsonReader;
 
-import com.android.paul.shoplist.Ingredient;
-import com.android.paul.shoplist.Quantity;
-import com.android.paul.shoplist.ShopElement;
+import com.android.paul.shoplist.Entities.Ingredient;
+import com.android.paul.shoplist.Entities.Quantity;
+import com.android.paul.shoplist.Entities.ShopElement;
 
 import java.io.IOException;
 import java.io.InputStream;

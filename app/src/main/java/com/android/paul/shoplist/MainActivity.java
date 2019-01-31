@@ -30,6 +30,10 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.PopupWindow;
+
+import com.android.paul.shoplist.Entities.Ingredient;
+import com.android.paul.shoplist.Entities.Quantity;
+import com.android.paul.shoplist.Entities.ShopElement;
 import com.android.paul.shoplist.filecommunication.Reader;
 import com.android.paul.shoplist.filecommunication.Writer;
 import java.io.FileInputStream;
@@ -42,15 +46,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private RecyclerView recyclerView;
     private RecyclerViewAdapter adapter;
-    private List<ShopElement> shopList = new ArrayList<ShopElement>();
     private View mainView;
+    private EditText inputIngredient;
+    private Button addButton;
 
     String fileName = "ShopListeeeeeee";
-
-    EditText inputQuantity;
-    EditText inputIngredient;
-    Button addButton;
-
     String quantityNum = "";
     String quantityUnit = "";
 
@@ -61,16 +61,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         mainView = findViewById(R.id.content_main);
 
-        initData();
-
         recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
         //recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new RecyclerViewAdapter(shopList);
+        adapter = new RecyclerViewAdapter();
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         recyclerView.setAdapter(adapter);
+
+        initData();
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void initData() {
         try{
-            shopList = Reader.readJsonStream(new FileInputStream(getFilesDir() + fileName));
+            adapter.setShopList(Reader.readJsonStream(new FileInputStream(getFilesDir() + fileName)));
         }
         catch(IOException ex) {
             System.out.println("problem reading");
@@ -207,6 +207,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View view) {
                 addRow(new ShopElement(new Ingredient(inputIngredient.getText().toString()), new Quantity(quantityNum, quantityUnit)));
                 popupWindow.dismiss();
+                quantityNum = "";
+                quantityUnit = "";
             }
         });
 
@@ -283,8 +285,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void addRow(ShopElement newShopElement) {
         try{
-            shopList.add(newShopElement);
-            Writer.writeJsonStream(new FileOutputStream(getFilesDir() + fileName), shopList);
+            adapter.addItem(newShopElement);
+            Writer.writeJsonStream(new FileOutputStream(getFilesDir() + fileName), adapter.getShopList());
             adapter.notifyDataSetChanged();
         }
         catch(IOException ex)
@@ -306,10 +308,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (viewHolder instanceof RecyclerViewHolder) {
             // get the removed item name to display it in snack bar
-            String deletedName = shopList.get(viewHolder.getAdapterPosition()).getIngredient().getName();
+            String deletedName = adapter.getItem(viewHolder.getAdapterPosition()).getIngredient().getName();
 
             // backup of removed item for undo purpose
-            final ShopElement deletedItem = shopList.get(viewHolder.getAdapterPosition());
+            final ShopElement deletedItem = adapter.getItem(viewHolder.getAdapterPosition());
             final int deletedIndex = viewHolder.getAdapterPosition();
 
             // remove the item from recycler view

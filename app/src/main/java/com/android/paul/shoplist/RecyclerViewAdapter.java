@@ -1,12 +1,12 @@
 package com.android.paul.shoplist;
 
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+
+import com.android.paul.shoplist.Entities.ShopElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +14,21 @@ import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder>{
 
-    private List<ShopElement> shopList = new ArrayList<ShopElement>();
+    private List<ShopElement> shopList;
 
     RecyclerViewAdapter(List<ShopElement> shopList) {
+        this.shopList = shopList;
+    }
+
+    RecyclerViewAdapter() {
+        this.shopList = new ArrayList<ShopElement>();
+    }
+
+    public List<ShopElement> getShopList() {
+        return shopList;
+    }
+
+    public void setShopList(List<ShopElement> shopList) {
         this.shopList = shopList;
     }
 
@@ -52,6 +64,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
         shopList.add(position, item);
         // notify item added by position
         notifyItemInserted(position);
+    }
+
+    public void addItem(ShopElement item)
+    {
+        shopList.add(item);
+        notifyDataSetChanged();
+    }
+
+    public ShopElement getItem(int position)
+    {
+        return shopList.get(position);
     }
 }
 

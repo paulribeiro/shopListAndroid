@@ -1,4 +1,7 @@
-package com.android.paul.shoplist;
+package com.android.paul.shoplist.Entities;
+
+import com.android.paul.shoplist.Entities.Ingredient;
+import com.android.paul.shoplist.Entities.Quantity;
 
 public class ShopElement {
     private Ingredient ingredient;
