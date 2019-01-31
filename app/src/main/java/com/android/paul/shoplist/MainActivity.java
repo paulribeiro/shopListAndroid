@@ -30,7 +30,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.PopupWindow;
-
 import com.android.paul.shoplist.Entities.Ingredient;
 import com.android.paul.shoplist.Entities.Quantity;
 import com.android.paul.shoplist.Entities.ShopElement;
@@ -39,8 +38,7 @@ import com.android.paul.shoplist.filecommunication.Writer;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
 
@@ -49,7 +47,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private View mainView;
     private EditText inputIngredient;
     private Button addButton;
-
     String fileName = "ShopListeeeeeee";
     String quantityNum = "";
     String quantityUnit = "";
@@ -287,7 +284,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         try{
             adapter.addItem(newShopElement);
             Writer.writeJsonStream(new FileOutputStream(getFilesDir() + fileName), adapter.getShopList());
-            adapter.notifyDataSetChanged();
         }
         catch(IOException ex)
         {
@@ -315,7 +311,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             final int deletedIndex = viewHolder.getAdapterPosition();
 
             // remove the item from recycler view
-            adapter.removeItem(viewHolder.getAdapterPosition());
+            try{
+                adapter.removeItem(viewHolder.getAdapterPosition());
+                Writer.writeJsonStream(new FileOutputStream(getFilesDir() + fileName), adapter.getShopList());
+            }
+            catch(IOException ex)
+            {
+                System.out.println("problem writing");
+            }
 
             // showing snack bar with Undo option
             Snackbar snackbar = Snackbar
@@ -325,7 +328,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 public void onClick(View view) {
 
                     // undo is selected, restore the deleted item
-                    adapter.restoreItem(deletedItem, deletedIndex);
+                    try{
+                        adapter.restoreItem(deletedItem, deletedIndex);
+                        Writer.writeJsonStream(new FileOutputStream(getFilesDir() + fileName), adapter.getShopList());
+                    }
+                    catch(IOException ex)
+                    {
+                        System.out.println("problem writing");
+                    }
                 }
             });
             snackbar.setActionTextColor(Color.YELLOW);
