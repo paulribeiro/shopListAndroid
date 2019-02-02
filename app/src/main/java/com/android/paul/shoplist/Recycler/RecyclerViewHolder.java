@@ -1,9 +1,11 @@
-package com.android.paul.shoplist;
+package com.android.paul.shoplist.Recycler;
 
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
+
+import com.android.paul.shoplist.R;
 
 public class RecyclerViewHolder extends RecyclerView.ViewHolder{
     public TextView ingredientTextView;

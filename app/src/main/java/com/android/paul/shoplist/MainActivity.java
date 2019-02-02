@@ -1,7 +1,11 @@
 package com.android.paul.shoplist;
 
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -31,19 +35,27 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.PopupWindow;
 import com.android.paul.shoplist.Entities.Ingredient;
+import com.android.paul.shoplist.Entities.MenuElement;
 import com.android.paul.shoplist.Entities.Quantity;
 import com.android.paul.shoplist.Entities.ShopElement;
+import com.android.paul.shoplist.Recycler.RecyclerItemTouchHelper;
+import com.android.paul.shoplist.Recycler.RecyclerViewAdapter;
+import com.android.paul.shoplist.Recycler.RecyclerViewHolder;
+import com.android.paul.shoplist.Recycler.RecyclerViewMenuAdapter;
 import com.android.paul.shoplist.filecommunication.Reader;
 import com.android.paul.shoplist.filecommunication.Writer;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
 
     private RecyclerView recyclerView;
     private RecyclerViewAdapter adapter;
+    private RecyclerViewMenuAdapter adapterMenu;
     private View mainView;
     private EditText inputIngredient;
     private Button addButton;
@@ -62,6 +74,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
+
+
+
+
         adapter = new RecyclerViewAdapter();
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
@@ -134,7 +150,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_camera) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
+            //Intent gameActivity = new Intent(MainActivity.this, MenuActivity.class);
+            //startActivity(gameActivity);
 
+            adapterMenu = new RecyclerViewMenuAdapter();
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+            recyclerView.setAdapter(adapterMenu);
+
+            initDataMenu();
+
+            ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+            new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+
+            Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onButtonShowPopupWindowClick(findViewById(R.id.content_main));
+                }
+            });
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -156,6 +194,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         catch(IOException ex) {
             System.out.println("problem reading");
         }
+    }
+
+    public void initDataMenu() {
+        // try {
+        List<MenuElement> menuList = new ArrayList<MenuElement>();
+        List<ShopElement> shopElementList = new ArrayList<ShopElement>();
+        shopElementList.add(new ShopElement(new Ingredient("Spaghetti"), new Quantity("500","g")));
+        menuList.add(new MenuElement(shopElementList, "Spaghetti Bolognaise"));
+        menuList.add(new MenuElement(shopElementList, "raclette"));
+
+        adapterMenu.setMenuList(menuList);
+
+        recyclerView.addItemDecoration(new VerticalSpaceItemDecoration(0){
+            @Override
+            public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+                // Do not draw the divider
+            }});
+        recyclerView.setBackgroundColor(2);
+
+        //adapter.setMenuList(Reader.readJsonStream(new FileInputStream(getFilesDir() + menuFileName)));
+        //} catch (IOException ex) {
+        //  System.out.println("problem reading");
+        // }
     }
 
     public void onButtonShowPopupWindowClick(View view) {

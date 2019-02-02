@@ -1,4 +1,4 @@
-package com.android.paul.shoplist;
+package com.android.paul.shoplist.Recycler;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.android.paul.shoplist.Entities.ShopElement;
+import com.android.paul.shoplist.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,11 +16,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
 
     private List<ShopElement> shopList;
 
-    RecyclerViewAdapter(List<ShopElement> shopList) {
+    public RecyclerViewAdapter(List<ShopElement> shopList) {
         this.shopList = shopList;
     }
 
-    RecyclerViewAdapter() {
+    public RecyclerViewAdapter() {
         this.shopList = new ArrayList<ShopElement>();
     }
 

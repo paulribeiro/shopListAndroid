@@ -1,4 +1,4 @@
-package com.android.paul.shoplist;
+package com.android.paul.shoplist.Recycler;
 
 import android.graphics.Canvas;
 import android.support.v7.widget.RecyclerView;
