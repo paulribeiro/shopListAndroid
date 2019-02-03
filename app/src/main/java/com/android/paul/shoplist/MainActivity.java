@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private View mainView;
     private EditText inputIngredient;
     private Button addButton;
+    private FloatingActionButton fab;
     String fileName = "ShopListeeeeeee";
     String quantityNum = "";
     String quantityUnit = "";
@@ -75,9 +77,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-
-
-
         adapter = new RecyclerViewAdapter();
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
@@ -91,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -149,13 +148,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
+            recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+            //recyclerView.setHasFixedSize(true);
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+            recyclerView.setLayoutManager(layoutManager);
+
+            adapter = new RecyclerViewAdapter();
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+            recyclerView.setAdapter(adapter);
+
+            initData();
+
+            ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+            new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+
+            Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+
+            fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onButtonShowPopupWindowClick(findViewById(R.id.content_main));
+                }
+            });
+
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.setDrawerListener(toggle);
+            toggle.syncState();
+
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener(this);
+            fab.show();
+
         } else if (id == R.id.nav_gallery) {
             //Intent gameActivity = new Intent(MainActivity.this, MenuActivity.class);
             //startActivity(gameActivity);
 
             adapterMenu = new RecyclerViewMenuAdapter();
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-            recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
             recyclerView.setAdapter(adapterMenu);
 
             initDataMenu();
@@ -166,13 +200,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
 
-            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onButtonShowPopupWindowClick(findViewById(R.id.content_main));
-                }
-            });
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.setDrawerListener(toggle);
+            toggle.syncState();
+
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener(this);
+
+            fab.hide();
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -202,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         List<ShopElement> shopElementList = new ArrayList<ShopElement>();
         shopElementList.add(new ShopElement(new Ingredient("Spaghetti"), new Quantity("500","g")));
         menuList.add(new MenuElement(shopElementList, "Spaghetti Bolognaise"));
-        menuList.add(new MenuElement(shopElementList, "raclette"));
+        menuList.add(new MenuElement(shopElementList, "Boeuf bourguignon"));
 
         adapterMenu.setMenuList(menuList);
 
@@ -211,7 +248,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
                 // Do not draw the divider
             }});
-        recyclerView.setBackgroundColor(2);
 
         //adapter.setMenuList(Reader.readJsonStream(new FileInputStream(getFilesDir() + menuFileName)));
         //} catch (IOException ex) {

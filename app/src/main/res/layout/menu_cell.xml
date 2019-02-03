@@ -11,20 +11,20 @@
         android:id="@+id/constraint_layout_menu_cell_background"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/grey"
+        android:background="#AFAFAF"
         android:orientation="vertical">
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/constraint_layout_menu_cell"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginBottom="10dp"
-            android:radius="12dp"
             android:background="@color/white"
             android:orientation="vertical"
+            android:radius="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -32,12 +32,13 @@
 
             <ImageView
                 android:id="@+id/imageView2"
-                android:layout_width="0dp"
-                android:layout_height="150dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:srcCompat="@tools:sample/avatars" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/MenuText"
@@ -56,6 +57,29 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView2"
                 tools:text="carottes" />
 
+            <TextView
+                android:id="@+id/voirPlus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/voir_plus"
+                android:focusable="true"
+                android:clickable="true"
+                android:onClick="see_more_cell"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/MenuText" />
+
+            <TextView
+                android:id="@+id/description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:text="Les lasagnes à la bolognaises sont composées de .......... viande, carottes, sauce ......"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/voirPlus" />
+
             <Button
                 android:id="@+id/buttonYes"
                 android:layout_width="0dp"
@@ -65,26 +89,29 @@
                 android:layout_marginEnd="12dp"
                 android:layout_marginBottom="16dp"
                 android:layout_weight="1"
+                android:background="@drawable/layout_bg_yes_button"
                 android:text="OUI"
+                android:textColor="#4CAF50"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/buttonNo"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/MenuText" />
+                app:layout_constraintTop_toBottomOf="@+id/description" />
 
             <Button
                 android:id="@+id/buttonNo"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:layout_marginTop="16dp"
                 android:layout_marginEnd="24dp"
                 android:layout_marginBottom="16dp"
                 android:layout_weight="1"
+                android:background="@drawable/layout_bg_no_button"
                 android:text="NON"
+                android:textColor="#E05151"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/buttonYes"
-                app:layout_constraintTop_toBottomOf="@+id/MenuText" />
+                app:layout_constraintTop_toTopOf="@+id/buttonYes" />
 
 
         </android.support.constraint.ConstraintLayout>

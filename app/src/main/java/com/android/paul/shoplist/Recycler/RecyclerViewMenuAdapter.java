@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.paul.shoplist.Entities.MenuElement;
+import com.android.paul.shoplist.Entities.ShopElement;
 import com.android.paul.shoplist.R;
 
 import java.util.ArrayList;
@@ -43,7 +44,20 @@ public class RecyclerViewMenuAdapter extends RecyclerView.Adapter<RecyclerViewMe
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewMenuHolder holder, int position) {
         holder.menuTextView.setText(menuList.get(position).getTitle());
-        //holder.imageView.setImageDrawable();
+        if(position == 0)
+        {
+            holder.imageView.setImageResource(R.drawable.spaghetti_bolo);
+        }
+        else
+        {
+            holder.imageView.setImageResource(R.drawable.boeuf_bourguignon);
+        }
+        String shopListString = "Recette :\n";
+        for(ShopElement shopElement : menuList.get(position).getShopElementList()){
+            shopListString += (shopElement.getQuantity().getNumber() + " " +shopElement.getQuantity().getUnit() + " " + shopElement.getIngredient().getName()+"\n");
+        }
+        holder.description.setText(shopListString);
+
     }
 
     @Override
