@@ -16,6 +16,7 @@ import java.util.List;
 public class RecyclerViewMenuAdapter extends RecyclerView.Adapter<RecyclerViewMenuHolder>{
 
     private List<MenuElement> menuList;
+    private boolean isMenu;
 
     public RecyclerViewMenuAdapter(List<MenuElement> menuList) {
         this.menuList = menuList;
@@ -23,6 +24,11 @@ public class RecyclerViewMenuAdapter extends RecyclerView.Adapter<RecyclerViewMe
 
     public RecyclerViewMenuAdapter() {
         this.menuList = new ArrayList<MenuElement>();
+    }
+
+    public RecyclerViewMenuAdapter(boolean isMenu) {
+        this.menuList = new ArrayList<MenuElement>();
+        this.isMenu = isMenu;
     }
 
     public List<MenuElement> getMenuList() {
@@ -42,7 +48,7 @@ public class RecyclerViewMenuAdapter extends RecyclerView.Adapter<RecyclerViewMe
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerViewMenuHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerViewMenuHolder holder, final int position) {
         holder.menuTextView.setText(menuList.get(position).getTitle());
         if(position == 0)
         {
@@ -54,10 +60,33 @@ public class RecyclerViewMenuAdapter extends RecyclerView.Adapter<RecyclerViewMe
         }
         String shopListString = "Recette :\n";
         for(ShopElement shopElement : menuList.get(position).getShopElementList()){
-            shopListString += (shopElement.getQuantity().getNumber() + " " +shopElement.getQuantity().getUnit() + " " + shopElement.getIngredient().getName()+"\n");
+            shopListString += (shopElement.toString()+"\n");
         }
         holder.description.setText(shopListString);
 
+        //to know if we are in menu or suggestion
+        if(isMenu)
+        {
+            holder.buttonYes.setVisibility(View.GONE);
+            holder.buttonNo.setVisibility(View.GONE);
+        }
+        else
+        {
+            holder.buttonNo.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // TODO Auto-generated method stub
+                    removeItem(position);
+                }
+            });
+
+            holder.buttonYes.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // generate event on click
+                }
+            });
+        }
     }
 
     @Override

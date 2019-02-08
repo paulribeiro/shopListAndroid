@@ -3,10 +3,13 @@ package com.android.paul.shoplist;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.hardware.Camera;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -53,6 +56,8 @@ import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
+
+    static final int REQUEST_IMAGE_CAPTURE = 1;
 
     private RecyclerView recyclerView;
     private RecyclerViewAdapter adapter;
@@ -147,6 +152,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
+            //liste de courses
             // Handle the camera action
             recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
             //recyclerView.setHasFixedSize(true);
@@ -167,6 +173,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setSupportActionBar(toolbar);
 
             fab = (FloatingActionButton) findViewById(R.id.fab);
+            //fab.setImageResource(R.drawable);
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -185,12 +192,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             fab.show();
 
         } else if (id == R.id.nav_gallery) {
+            //mes menus
             //Intent gameActivity = new Intent(MainActivity.this, MenuActivity.class);
             //startActivity(gameActivity);
-
-            adapterMenu = new RecyclerViewMenuAdapter();
+            adapterMenu = new RecyclerViewMenuAdapter(true);
             recyclerView.setItemAnimator(new DefaultItemAnimator());
             recyclerView.setAdapter(adapterMenu);
+
+            recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), LinearLayoutManager.VERTICAL) {
+                @Override
+                public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+                    // Do not draw the divider
+                }
+            });
 
             initDataMenu();
 
@@ -210,10 +224,82 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setNavigationItemSelectedListener(this);
 
             fab.hide();
+
+
         } else if (id == R.id.nav_slideshow) {
+            // mon stock
+            //liste de courses
+            // Handle the camera action
+            recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+            //recyclerView.setHasFixedSize(true);
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+            recyclerView.setLayoutManager(layoutManager);
+
+            adapter = new RecyclerViewAdapter();
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+            recyclerView.setAdapter(adapter);
+
+            initData();
+
+            ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+            new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+
+            Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+
+            fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setImageResource(R.drawable.ic_menu_camera);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dispatchTakePictureIntent();
+                    //onButtonShowPopupWindowClick(findViewById(R.id.content_main));
+                }
+            });
+
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.setDrawerListener(toggle);
+            toggle.syncState();
+
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener(this);
+            fab.show();
 
         } else if (id == R.id.nav_manage) {
+            //suggestions
 
+            adapterMenu = new RecyclerViewMenuAdapter();
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.setAdapter(adapterMenu);
+
+            recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), LinearLayoutManager.VERTICAL) {
+                @Override
+                public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+                    // Do not draw the divider
+                }
+            });
+
+            initDataMenu();
+
+            ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+            new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+
+            Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.setDrawerListener(toggle);
+            toggle.syncState();
+
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener(this);
+
+            fab.hide();
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
@@ -238,16 +324,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         List<MenuElement> menuList = new ArrayList<MenuElement>();
         List<ShopElement> shopElementList = new ArrayList<ShopElement>();
         shopElementList.add(new ShopElement(new Ingredient("Spaghetti"), new Quantity("500","g")));
+        shopElementList.add(new ShopElement(new Ingredient("Tomates"), new Quantity("200","g")));
+        shopElementList.add(new ShopElement(new Ingredient("Viande de boeuf"), new Quantity("200","g")));
+        shopElementList.add(new ShopElement(new Ingredient("Sel"), new Quantity("","")));
         menuList.add(new MenuElement(shopElementList, "Spaghetti Bolognaise"));
         menuList.add(new MenuElement(shopElementList, "Boeuf bourguignon"));
 
         adapterMenu.setMenuList(menuList);
-
-        recyclerView.addItemDecoration(new VerticalSpaceItemDecoration(0){
-            @Override
-            public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
-                // Do not draw the divider
-            }});
 
         //adapter.setMenuList(Reader.readJsonStream(new FileInputStream(getFilesDir() + menuFileName)));
         //} catch (IOException ex) {
@@ -438,6 +521,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             snackbar.setActionTextColor(Color.YELLOW);
             snackbar.show();
         }
+    }
 
+
+
+
+
+
+
+
+
+    /** Check if this device has a camera */
+    private boolean checkCameraHardware(Context context) {
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+            // this device has a camera
+            return true;
+        } else {
+            // no camera on this device
+            return false;
+        }
+    }
+
+    /** A safe way to get an instance of the Camera object. */
+    public static Camera getCameraInstance(){
+        Camera c = null;
+        try {
+            c = Camera.open(); // attempt to get a Camera instance
+        }
+        catch (Exception e){
+            // Camera is not available (in use or does not exist)
+        }
+        return c; // returns null if camera is unavailable
+    }
+
+
+
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.android.paul.shoplist.Entities;
 import com.android.paul.shoplist.Entities.Ingredient;
 import com.android.paul.shoplist.Entities.Quantity;
 
+
 public class ShopElement {
     private Ingredient ingredient;
     private Quantity quantity;
@@ -26,5 +27,9 @@ public class ShopElement {
 
     public void setQuantity(Quantity quantity) {
         this.quantity = quantity;
+    }
+
+    public String toString() {
+        return this.quantity.getNumber() + " " + this.quantity.getUnit()+ " " + this.ingredient.getName();
     }
 }
